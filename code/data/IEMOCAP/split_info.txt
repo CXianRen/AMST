@@ -1,0 +1,13 @@
+split_ratio: [0.8, 0.1, 0.1]
+seed: 0
+num of samples in each class:
+class: train, test, valid
+ang: 882, 110, 111
+exc: 832, 104, 105
+fru: 1479, 184, 186
+neu: 1366, 170, 172
+sad: 867, 108, 109
+num of samples in each split:
+train: 5426
+test: 676
+valid: 683

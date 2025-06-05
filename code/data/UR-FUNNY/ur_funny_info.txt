@@ -1,0 +1,11 @@
+Total number of text data: 10166
+Total number of label data: 10166
+Label statistic: {1: 5083, 0: 5083}
+Train: 8132
+Train statistic: {0: 4070, 1: 4062}
+Valid: 1016
+Valid statistic: {1: 501, 0: 515}
+Test: 1018
+Test statistic: {1: 520, 0: 498}
+Max text length: 677
+Average text length: 82
