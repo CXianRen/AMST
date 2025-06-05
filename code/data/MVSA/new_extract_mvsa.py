@@ -1,14 +1,19 @@
 import os
 import shutil
 from tqdm import tqdm
-import numpy as np
 import torch
 from transformers import RobertaTokenizer
 
 # --------------------------
 # Configuration and Paths
 # --------------------------
-mvsa_dir = "/mimer/NOBACKUP/groups/naiss2024-22-578/MVSA_Single"
+
+DATASET_PATH=os.environ.get("DATASET_PATH", None)
+if DATASET_PATH is None:
+    raise ValueError("Please set the DATASET_PATH environment variable to the root directory of your dataset.")
+
+
+mvsa_dir = DATASET_PATH
 data_dir = os.path.join(mvsa_dir, "data")   # Contains the .txt caption files and images
 
 # Output directories for tokens, padding masks, and images
@@ -19,7 +24,9 @@ os.makedirs(text_token_dir, exist_ok=True)
 os.makedirs(visual_target_dir, exist_ok=True)
 
 # Input label files mapping for each split
-input_base_dir = "/mimer/NOBACKUP/groups/naiss2024-22-578/multimodal-learning-master-thesis/AMST/data/MVSA"
+path_of_this_script = os.path.dirname(os.path.abspath(__file__))
+
+input_base_dir = path_of_this_script
 label_files = {
     "train": "my_train_mvsa.txt",
     "val": "my_val_mvsa.txt",

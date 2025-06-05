@@ -1,6 +1,33 @@
-[IEMOCAP offical Website](https://sail.usc.edu/iemocap/iemocap_info.htm)
+# IEMOCAP Dataset Usage Guide
 
-# About dataset
+## 1. Download Data
+
+Please download the dataset from [Link](https://sail.usc.edu/iemocap/iemocap_info.html) and unzip it.
+
+---
+
+## 2. Preprocessing
+
+### 2.1 Preparing Data
+```sh
+#1. use gen_iemo_dataset.py to generat iemocap_all_sample.txt
+
+#2. use extract_video_clips.py to generate video clips from raw videos
+
+#3. use mp4_to_wav.py to generate wav files
+#       eg.python3 data/scripts/mp4_to_wav.py ~/MP4 ~/WAV
+#3.1 convert to fbank
+#       eg.mkdir ~/fbank/
+#          python3 data/scripts/extract_fbank.py ~/WAV/ ~/fbank/
+
+#4. use video_processing.py to generate imgs
+#       eg.python3 data/scripts/video_preprocessing.py ~/MP4 ~/IMAGE_KEPT_2_PER_SEC/ 2 ".mp4"
+
+#5. using data/IEMOCAP/extract_text_tokens.py to generate text token
+```
+
+
+# More About dataset
 + Modalities- Audio, video, Motion Capture
 + Emotional content (10)- 
 **angry, happy, sad, neutral, frustrated, excited, fearful, disgusted, excited, other**

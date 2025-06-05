@@ -13,7 +13,7 @@ def load_labels(label_file_path):
     Expected label file format:
       image_id<TAB>label1,label2
     For example:
-      4   positive,positive
+      4   positive, positive
       5   positive, negative
       6   positive, neutral
       7   negative, neutral

@@ -13,7 +13,7 @@ Please download the CREMAD dataset from [CREMAD GitHub](https://github.com/Cheyn
 ```sh
 export DATASET_PATH=[YOUR_DATASET_PATH]
 ```
-Replace `[YOUR_DATASET_PATH]` with your local CREMAD dataset path.
+Replace `[YOUR_DATASET_PATH]` with your local dataset path.
 
 ---
 

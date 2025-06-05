@@ -7,3 +7,21 @@ If you encounter any issues or have suggestions, your feedback is highly appreci
 We will do our best to maintain and improve this repository—although, as you might understand, it can sometimes be challenging.
 
 
+# Env
+Most time it should work:
+```sh
+pip install -r requirement.txt
+```
+
+# Dataset
+
+| Dataset   | V | A | T | Link                                         | Example         |
+|-----------|---|---|---|----------------------------------------------|-----------------|
+| CREMAD    | √ | √ | × | [CREMAD](./Doc/dataset/CREMAD.md)           | <img src="Doc/dataset/imgs/example_cremad.png" alt="CREMAD example" width="100" height="50">|
+| AVE       | √ | √ | × | [AVE](./Doc/dataset/AVE.md)                 | <img src="Doc/dataset/imgs/example_ave.png" alt="AVE example" width="100" height="50"> |
+| MVSA      | √ | × | √ | [MVSA](./Doc/dataset/MVSA.md)               | <img src="Doc/dataset/imgs/example_mvsa.jpg" alt="mvsa example" width="100" height="50"> |
+| IEMOCAP   | √ | √ | √ | [IEMOCAP](./Doc/dataset/IEMOCAP.md)         | <img src="Doc/dataset/imgs/example_iemo.jpg" alt="IEMO example" width="100" height="50"> |
+| UR-FUNNY  | √ | √ | √ | [UR-FUNNY](./Doc/dataset/UR-FUNNY.md)       | <img src="Doc/dataset/imgs/example_uf.jpg" alt="UF example" width="100" height="50"> |
+
+
+# 

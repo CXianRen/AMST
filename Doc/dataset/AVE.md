@@ -14,7 +14,7 @@ Please download the AVE dataset from [AVE](https://github.com/YapengTian/AVE-ECC
 ```sh
 export DATASET_PATH=[YOUR_DATASET_PATH]
 ```
-Replace `[YOUR_DATASET_PATH]` with your local CREMAD dataset path.
+Replace `[YOUR_DATASET_PATH]` with your local dataset path.
 
 ---
 
