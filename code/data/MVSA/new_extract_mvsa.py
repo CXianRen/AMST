@@ -16,6 +16,7 @@ if DATASET_PATH is None:
 mvsa_dir = DATASET_PATH
 data_dir = os.path.join(mvsa_dir, "data")   # Contains the .txt caption files and images
 
+print(f"Using dataset path: {mvsa_dir}")
 # Output directories for tokens, padding masks, and images
 
 text_token_dir = os.path.join(mvsa_dir, "text_token", "roberta-base")
@@ -48,8 +49,8 @@ for split, filename in label_files.items():
     input_path = os.path.join(input_base_dir, filename)
     
     # Create dedicated subdirectories for token files and visual images
-    token_subdir = os.path.join(text_token_dir, f"{split}_token")
-    visual_subdir = os.path.join(visual_target_dir, f"{split}_imgs")
+    token_subdir = text_token_dir
+    visual_subdir = visual_target_dir
     os.makedirs(token_subdir, exist_ok=True)
     os.makedirs(visual_subdir, exist_ok=True)
     

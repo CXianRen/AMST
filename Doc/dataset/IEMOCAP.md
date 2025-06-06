@@ -3,7 +3,10 @@
 ## 1. Download Data
 
 Please download the dataset from [Link](https://sail.usc.edu/iemocap/iemocap_info.html) and unzip it.
+Or  
 
+Download our prepared data here:[data prepared](https://drive.google.com/drive/folders/1x9TER3mc1sMgcALp7x_ooK65IjRHOaHN?usp=sharing)
+For running, you just need fbank.zip, IMAGE_KEPT_X_PER_SEC.zip
 ---
 
 ## 2. Preprocessing

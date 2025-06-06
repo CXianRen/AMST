@@ -1,6 +1,6 @@
 # This file is used to do very basic testing of the dataset class.
 
-from .dataset import AVDataset, TVDataset, TVADataset
+from .dataset import AVDataset, TVDataset, TVADataset, build_train_val_test_datasets
 
 # test AVDataset
 def test_avdataset():
@@ -68,7 +68,39 @@ def test_tvav_dataset():
     assert len(dataset) == 1016
     
     print("Passed ", test_tvav_dataset.__name__)
-    
+  
+  
 test_avdataset()   
 test_tv_dataset()
 test_tvav_dataset()
+
+
+def test_dataset(name):
+    args = type("args", (object,), {})()
+    args.dataset = name
+    
+    train_dataset, validation_dataset, test_dataset = build_train_val_test_datasets(args)
+    assert train_dataset is not None
+    assert len(train_dataset) != 0
+    data = train_dataset[0]
+    assert train_dataset[0] is not None
+    
+    assert validation_dataset is not None
+    assert len(validation_dataset) != 0
+    data = validation_dataset[0]
+    assert validation_dataset[0] is not None
+    
+    assert test_dataset is not None
+    assert len(test_dataset) != 0
+    data = test_dataset[0]
+    assert test_dataset[0] is not None
+    
+    print("Passed ", "Dataset test for", name)
+    
+# Test all datasets
+test_dataset("CREMAD")
+test_dataset("AVE")
+test_dataset("MVSA")
+test_dataset("URFUNNY")
+test_dataset("IEMOCAP")
+test_dataset("IEMOCAP3")

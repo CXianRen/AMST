@@ -20,18 +20,18 @@ def printDebugInfo(*args):
     # print("[DEBUG] [%.3f]"%(time.time()), *args)
     pass
 
-DATASET_LIST = ['CREMAD', 'AVE', 'MVSA', 'IEMOCAP', 'IEMOCAP3', 'URFUNNY', 'SSW60']
+DATASET_LIST = ['CREMAD', 'AVE', 'MVSA', 'IEMOCAP', 'IEMOCAP3', 'URFUNNY']
 TVA_SET_LIST = ["URFUNNY", "IEMOCAP3"]
-AV_SET_LIST = ["CREMAD", "AVE", "SSW60", 'IEMOCAP']
+AV_SET_LIST = ["CREMAD", "AVE", 'IEMOCAP']
 TV_SET_LIST = ["MVSA"]
 
 # datasets have 2 modalities, because some methods only support 2 modalities
-M2DATASET_LIST = ["MVSA", "CREMAD", "AVE", "IEMOCAP", "SSW60"]
+M2DATASET_LIST = ["MVSA", "CREMAD", "AVE", "IEMOCAP" ]
 # datasets have 3 modalities
 M3DATASET_LIST = ["IEMOCAP3", "URFUNNY"]
 
-DATASET_HAS_AUDIO_LIST = ['AVE', 'CREMAD', 'SSW60','IEMOCAP', 'IEMOCAP3', 'URFUNNY']
-DATASET_HAS_VISUAL_LIST = ['AVE', 'CREMAD','SSW60', 'MVSA', 'IEMOCAP', 'IEMOCAP3', 'URFUNNY']
+DATASET_HAS_AUDIO_LIST = ['AVE', 'CREMAD', 'IEMOCAP', 'IEMOCAP3', 'URFUNNY']
+DATASET_HAS_VISUAL_LIST = ['AVE', 'CREMAD', 'MVSA', 'IEMOCAP', 'IEMOCAP3', 'URFUNNY']
 DATASET_HAS_TEXT_LIST = ['MVSA', 'IEMOCAP3', 'URFUNNY']
 
 
@@ -42,8 +42,7 @@ def get_num_classes(dataset):
         'AVE': 28,
         'IEMOCAP': 5,
         'IEMOCAP3': 5,
-        'URFUNNY': 2,
-        'SSW60': 60,
+        'URFUNNY': 2
     }
     if dataset not in dataset_classes_map:
         raise NotImplementedError('Incorrect dataset name {}'.format(dataset))
@@ -58,8 +57,7 @@ def build_train_val_test_datasets(args):
         'AVE': AVDataset,
         'IEMOCAP': AVDataset,
         'IEMOCAP3': TVADataset,
-        'URFUNNY': TVADataset,
-        'SSW60': SSW60,
+        'URFUNNY': TVADataset
     }
 
     if args.dataset not in dataset_classes:
@@ -78,8 +76,7 @@ sep_map = {
             "IEMOCAP": ",",
             "IEMOCAP3": ",",
             "URFUNNY": ",",
-            "SSW60": ",",
-            "MVSA": ".jpg ", # becareful there is a space here 
+            "MVSA": ".jpg ", # becareful there is a space 
         }
 
 class AddGaussianNoise(torch.nn.Module):
@@ -405,60 +402,3 @@ class TVADataset(DatasetBase):
         # size of padding_mask size:  torch.Size([128])
     
         return tokenizer, padding_mask, image_n, audio_feature, label, sid
-
-class SSW60(DatasetBase):
-    def __init__(self, args, mode='train'):
-        printDebugInfo(os.path.basename(__file__), " -  SSW60")
-        super().__init__(args, mode, pick_num=1)  # 默认 pick_num 为 1
-        self._init_data()
-
-    def _init_data(self):
-        mode_to_file = {'train': self.train_txt, 
-                        'val': self.val_txt, 
-                        'test': self.test_txt}
-        csv_file = mode_to_file[self.mode]
-        self.data = []
-        self.data2class = {}
-        self.audio_sid_path_map = {}
-        self.visual_sid_path_map = {}
-
-        sep = sep_map[self.args.dataset]
-        with open(csv_file, "r") as f:
-            for line in f:
-                item = [i.strip() for i in line.strip().split(sep)]
-                label = int(item[0]) 
-                audio_id = item[1]   
-                video_id = item[2]
-               
-                audio_path = os.path.join(self.audio_feature_path, audio_id + '.npy')
-                visual_path = os.path.join(self.visual_feature_path, video_id + '.jpg')
-
-                if os.path.exists(audio_path) and os.path.exists(visual_path):
-                    self.data.append((label, audio_path, visual_path, audio_id + "_" + video_id))
-                    self.data2class[audio_id + "_" + video_id] = label
-                    self.audio_sid_path_map[audio_id + "_" + video_id] = audio_path
-                    self.visual_sid_path_map[audio_id + "_" + video_id] = visual_path
-                else:
-                    raise FileNotFoundError("File not found: ", 
-                        audio_path if not os.path.exists(audio_path) else visual_path)
-
-    def __getitem__(self, idx: int):
-        data = self.data[idx]
-        label = data[0]
-        audio_path = data[1]
-        visual_path = data[2]
-        sid = data[3]
-        # Audio
-        audio_feature = torch.from_numpy(np.load(audio_path))
-        if self.a_transform is not None:
-            audio_feature = self.a_transform(audio_feature)
-
-        # Visual
-        with Image.open(visual_path) as img:
-            img = img.convert('RGB')
-            image_tensor = self.transform(img)
-
-        # Add dummy temporal dimension
-        image_tensor = image_tensor.unsqueeze(1)
-
-        return audio_feature, image_tensor, label, sid
