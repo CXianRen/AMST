@@ -3,9 +3,7 @@ from baseline.ogm3_new import OGMTrainer
 from baseline.mslr3_new import MSLRTrainer
 from baseline.pmr3_new import PMRTrainer
 from baseline.mla_new import MLATrainer
-from mart import MARTTrainer
 
-from metrics import set_profiler
 
 from .test_common import Mock_dataset, run_trainer_test
 
@@ -15,7 +13,6 @@ class TrainerHacker:
     def init_logging(self):
         self.save_path = "/tmp/"
         self.tsb_writer = None
-        self.prof = set_profiler("", False)
 
     def init_dataset(self):
         size = getattr(self, 'mock_data_size', 64)
@@ -44,10 +41,6 @@ class TestMLATrainer(TrainerHacker, MLATrainer):
     def __init__(self):
         super().__init__("--epochs 1 --batch_size 2".split())
 
-class TestMARTTrainer(TrainerHacker, MARTTrainer):
-    def __init__(self):
-        super().__init__("--epochs 1 --batch_size 2".split())
-
 
 if __name__ == "__main__":
     run_trainer_test(TestBasicTrainer, "test_basic_trainer")
@@ -55,4 +48,3 @@ if __name__ == "__main__":
     run_trainer_test(TestMSLRTrainer, "test_mslr3_trainer")
     run_trainer_test(TestPMRTrainer, "test_pmr3_trainer")
     run_trainer_test(TestMLATrainer, "test_mla_trainer")
-    run_trainer_test(TestMARTTrainer, "test_mart_trainer")

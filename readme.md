@@ -34,3 +34,15 @@ You can run a simple test for debugging when your data is ready.
 ```sh
 python3 -m dataset.test
 ```
+
+
+## Checkpoints
+we have uploaded parts of our model here [ckpt](https://drive.google.com/drive/folders/1x9TER3mc1sMgcALp7x_ooK65IjRHOaHN?usp=sharing). You can download and run evaluated directly with 
+
+```sh
+# single modal model
+python3 -m evaluate.eval_sm --dataset CREMAD --modalit visual --model_path `[YOUR CHECKPOINTS PATH]`
+```
+
+```sh
+```

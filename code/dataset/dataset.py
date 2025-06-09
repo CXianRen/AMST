@@ -79,20 +79,6 @@ sep_map = {
             "MVSA": ".jpg ", # becareful there is a space 
         }
 
-class AddGaussianNoise(torch.nn.Module):
-    """
-    This is for audio augmentation.
-    We do not use it in the paper.
-    """
-    def __init__(self, std=0.02):
-        super().__init__()
-        self.std = std
-
-    def forward(self, fbank):
-        noise = torch.randn_like(fbank) * self.std
-        return fbank + noise
-
-
 class DatasetBase(Dataset):
     """
     Base class for all datasets.
@@ -148,21 +134,13 @@ class DatasetBase(Dataset):
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
-            self.a_transform = None
-            if getattr(self.args, 'use_audio_augm', False):
-                self.a_transform = torch.nn.Sequential(
-                    T.TimeMasking(time_mask_param=100),
-                    T.FrequencyMasking(freq_mask_param=10),
-                    AddGaussianNoise(std=0.02)
-                )
-                printDebugInfo("Using fbank transform")
+
         else:
             self.transform = transforms.Compose([
                 transforms.Resize(size=(224, 224)),
                 transforms.ToTensor(),
                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
             ])
-            self.a_transform = None
 
     def __len__(self):
         return len(self.data)
@@ -247,8 +225,6 @@ class AVDataset(DatasetBase):
         # Audio
         audio_path = self.audio_sid_path_map[sid]
         audio_feature = torch.from_numpy(np.load(audio_path))
-        if self.a_transform is not None:
-            audio_feature = self.a_transform(audio_feature)
 
         # Visual
         visual_path = self.visual_sid_path_map[sid]

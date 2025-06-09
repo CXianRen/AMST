@@ -5,10 +5,8 @@ source ../env.sh
 source my_venv/bin/activate
 
 
-LR=0.001
-BS=64
 FUSION=lsum
-DATASET="MVSA"
+DATASET="CREMAD"
 EPOCH=100
 SEED=0
 
@@ -20,5 +18,5 @@ python -m baseline.naive_new \
           --random_seed ${SEED} \
           --fusion_method ${FUSION} \
           --epochs ${EPOCH} \
-          --no_test \
-          --no_using_ploader
+          # --no_using_ploader \
+          # --no_tf32

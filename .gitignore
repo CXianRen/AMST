@@ -3,3 +3,8 @@
 *.py[cod]
 *.pyo
 *.pyd
+
+#
+Jobs/my_venv
+ckpt/
+Jobs/logs/

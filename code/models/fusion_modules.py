@@ -16,16 +16,14 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-Fusion_List = ['sum', 'sumN', 'concat', 'gated', 'gate','film', 'mtmm', 'esum', 'lsum', 'msum']
+Fusion_List = ['concat', 'gated','film', 'mtmm', 'esum', 'lsum', 'msum']
 
 def gen_fusion_v2(args, input_dim, output_dim, name_list):
     fusion_methods = {
-        'esum': EarlySum,
         'lsum': LateSum,
         'msum': MLASum,
         'concat': EarlyConcat,
         'gated': newGatedFusion,
-        'gate': newGatedFusion,
         'film': newFiLM,
     }
     
@@ -92,48 +90,6 @@ class MLASum(nn.Module):
         else:
             raise ValueError("Modality name not found in the output dict")
  
-class EarlySum(nn.Module):
-    """
-    Early Sum fusion module.
-    Structure:
-    out = W[e1 + e2 + e3] + b = W[e1] + b/n + W[e2] + b/n + W[e3] + b/n
-    where n is the number of modalities.
-    This is the standard definition of early fusion.
-    """
-    def __init__(self, intput_dim, output_dim, modality_name_list):
-        super(EarlySum, self).__init__()
-        #  W[e1 + e2 + e3] + b = W[e1] + b/n + W[e2] + b/n + W[e3] + b/n
-        self.fc = nn.Linear(intput_dim, output_dim, bias=False)
-        self.bias = nn.Parameter(torch.zeros(output_dim))
-        
-        self.n_modalities = len(modality_name_list)
-        self.out_dict = dict()
-        
-    def forward(self, embeddings_dict: dict):
-        # embeddings_dict: {modality: tensor}
-        # sum the embeddings
-        #  W[e1 + e2 + e3] + b = W[e1] + b/n + W[e2] + b/n + W[e3] + b/n
-        non_zero_values = [v for v in embeddings_dict.values() if v is not None]
-        
-        for k, v in embeddings_dict.items():
-            if v is None:
-                # This part should only be used when
-                # using alternating training.
-                v = torch.zeros_like(non_zero_values[0])
-
-            self.out_dict[k] = self.fc(v) + self.bias/self.n_modalities
-        
-        # compute the sum of the valid values
-        # this equals to :  out = (out1 + out2 + out3)
-        out = torch.sum(torch.stack(list(self.out_dict.values())), dim=0)
-        return out
-    
-    def get_out_m(self, modality_name):
-        if modality_name in self.out_dict:
-            return self.out_dict[modality_name]
-        else:
-            raise ValueError("Modality name not found in the output dict")
-
 class EarlyConcat(nn.Module):
     """
         This is the standard definition of concatenation.

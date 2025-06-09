@@ -6,16 +6,16 @@ source my_venv/bin/activate
 
 
 CKPT="../ckpt/"
-SEED=16
-LR=0.01
+SEED=0
+LR=0.001
 BS=64
-EPOCHS=10
+EPOCHS=100
 
 
 run_naive() {
     echo "-------------- ${DATASET} ${MODALITY} --------------"
  
-    cd ../Mart
+    cd ../code
     python  -m baseline.single_modality \
                   --dataset ${DATASET} \
                     --modality ${MODALITY} \
@@ -29,40 +29,50 @@ run_naive() {
 }
 
 # CREMAD
-DATASET="CREMAD"
-MODALITY="visual"
-run_naive
+# DATASET="CREMAD"
 
-MODALITY="audio"
-run_naive
+# MODALITY="visual"
+# run_naive
+
+# MODALITY="audio"
+# run_naive
 
 # AVE
-DATASET="AVE"
-MODALITY="visual"  # audio, visual
-run_naive
+# DATASET="AVE"
+# MODALITY="visual"  # audio, visual
+# run_naive
 
-MODALITY="audio"
-run_naive
+# MODALITY="audio"
+# run_naive
+
 # MVSA
-DATASET="MVSA"
-MODALITY="visual"
-run_naive
-MODALITY="text"
-run_naive
+# DATASET="MVSA"
+# MODALITY="visual"
+# run_naive
+
+# MODALITY="text"
+# run_naive
+
+
 # IEMOCAP3
-DATASET="IEMOCAP3"
-MODALITY="audio"
-run_naive
-MODALITY="visual"
-run_naive
-MODALITY="text"
-run_naive
+# DATASET="IEMOCAP3"
+# MODALITY="audio"
+# run_naive
+
+# MODALITY="visual"
+# run_naive
+
+# MODALITY="text"
+# run_naive
+
 # URFUNNY
 DATASET="URFUNNY"
-MODALITY="visual"
-run_naive
-MODALITY="audio"
-run_naive
+# MODALITY="visual"
+# run_naive
+
+# MODALITY="audio"
+# run_naive
+
 MODALITY="text"
 run_naive
 

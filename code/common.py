@@ -22,7 +22,7 @@ from models.basic_model import  \
 from utils import print_args, set_save_path, TeeOutput, \
     printDebugInfo, setup_seed
 
-from metrics import performanceMetric, set_profiler
+from metrics import performanceMetric
 from prettytable import PrettyTable
 
 from datetime import datetime
@@ -169,8 +169,7 @@ class BasicTrainer:
         sys.stdout = TeeOutput(
             os.path.join(self.save_path, 'output.log'))
         self.tsb_writer = SummaryWriter(self.save_path)
-        # for torch profiler, default is False (turning off)       
-        self.prof=set_profiler("", False)
+
     
     def init_multi_gpu_env(self):
         # this part is removed, it is about our another project
@@ -566,83 +565,45 @@ class BasicTrainer:
                 first_batch_end_time - epoch_start_time)
             #
             
-    def train_method(self, embedding_dict, labels_device):
-        # the core training method,
-        # replace this function to implement different training methods in subclass
-        temp_grad_dict = {}
-
-        # we separate the training into two parts for speed up:
-        # 1. update fusion and saved the gradients for encoders
-        # 2. update encoders with the saved gradients
-        
-        # update fusion and saved the gradients for encoders
-        temp_input_dict = dict()
-        for modality_name in self.modality_name_list:
-            temp_input_dict[modality_name] = \
-            embedding_dict[modality_name].detach().to(
-                        self.device_map[MAIN_DEVICE_KEY])   
-            temp_input_dict[modality_name].requires_grad = True
-            
-        out_f = forward_fusion(self.model[KEY_FUSION], temp_input_dict)
-        
-        loss = self.criterion(out_f, labels_device) 
+    def train_method(self, embedding_dict, labels_device):   
+        out_f = forward_fusion(self.model[KEY_FUSION], embedding_dict)
+        loss = self.criterion(out_f, labels_device)
         self.optimizer_map[KEY_FUSION].zero_grad()
-        loss.backward()
-        for modality_name in self.modality_name_list:
-            temp_grad_dict[modality_name] = temp_input_dict[modality_name].grad
-        self.optimizer_map[KEY_FUSION].step()
-        
-        # update encoders
         self.optimizer_map[KEY_ENCODERS].zero_grad()
-        device_used = set()
-        
-        for modality_name in self.modality_name_list:
-            e_device = self.device_map[modality_name]
-            device_used.add(e_device)
-                    
-            if self.backward_stream_map.get(modality_name) is None:
-                self.backward_stream_map[modality_name] = torch.cuda.Stream(device=e_device)
-            with torch.cuda.stream(self.backward_stream_map[modality_name]):
-                embedding_dict[modality_name].backward(
-                    temp_grad_dict[modality_name].to(e_device))
-        
-        # sync all the devices
-        for e_device in device_used:
-            torch.cuda.synchronize(e_device)
-                        
+        loss.backward()
+        self.optimizer_map[KEY_FUSION].step()
         self.optimizer_map[KEY_ENCODERS].step()
+ 
 
     def train_epoch(self, dataloader): 
         
         self.reinitialize_metrics()        
         self.model.train() 
-        with self.prof:
-            epoch_start_time = time.time()
-            for step, data_packet in enumerate(dataloader):
-                if step == 0:
-                    first_batch_end_time = time.time()
+    
+        epoch_start_time = time.time()
+        for step, data_packet in enumerate(dataloader):
+            if step == 0:
+                first_batch_end_time = time.time()
 
-                ### forward ###
-                with torch.profiler.record_function("forward"):
-                    embedding_dict, helper_out_dict, labels_device = \
-                        self.forward(data_packet)
-                    self.after_forward_batch(embedding_dict, labels_device)
-                    
-                # train each modality alternatively
-                with torch.profiler.record_function("backward_main"):
-                    self.train_method(embedding_dict, labels_device)
-                    
-                ### backward ###
-                # backward helper, we don't update the backbone, just update the helper
-                with torch.profiler.record_function("backward_helper"):
-                    self.optimizer_map[KEY_HELPERS].zero_grad()
-                    for modality_name in self.modality_name_list:
-                        loss = self.criterion(helper_out_dict[modality_name], labels_device)
-                        loss.backward()
-                    self.optimizer_map[KEY_HELPERS].step()
-                # do profiling
-                hasattr(self.prof, "step") and self.prof.step()
-            
+            ### forward ###
+            with torch.profiler.record_function("forward"):
+                embedding_dict, helper_out_dict, labels_device = \
+                    self.forward(data_packet)
+                self.after_forward_batch(embedding_dict, labels_device)
+                
+            # train each modality alternatively
+            with torch.profiler.record_function("backward_main"):
+                self.train_method(embedding_dict, labels_device)
+                
+            ### backward ###
+            # backward helper, we don't update the backbone, just update the helper
+            with torch.profiler.record_function("backward_helper"):
+                self.optimizer_map[KEY_HELPERS].zero_grad()
+                for modality_name in self.modality_name_list:
+                    loss = self.criterion(helper_out_dict[modality_name], labels_device)
+                    loss.backward()
+                self.optimizer_map[KEY_HELPERS].step()
+
             # time measurement
             epoch_end_time = time.time()
             self.train_time_list.append(
@@ -666,6 +627,17 @@ class BasicTrainer:
             if self.args.run_test:
                 self.best_test_acc = self.test_m_map["f"].get_acc()
             self.best_epoch = self.epoch
+            
+            # save the best model
+            torch.save({
+                "model": self.model.state_dict(),
+                "optimizer_state_dict": self.optimizer_map,
+                "scheduler_state_dict": self.scheduler_map,
+                "args": self.args,
+                "best_val_acc": self.best_val_acc,
+                "best_test_acc": self.best_test_acc,
+                "epoch": self.epoch
+            }, os.path.join(self.save_path, 'best_model.pth'))
         
     def print_best_model(self):
         print("Best Val Acc: {:.3f}".format(
@@ -702,12 +674,6 @@ class BasicTrainer:
                 
                 train_time = time.time()
                 # validation
-                
-                if self.args.parallel_method == "ddp" and self.rank != 0:
-                    # only the main process will do the validation when 
-                    # using ddp 
-                    sys.stdout.flush()
-                    continue
                 
                 print_separator("Validation")
                 
@@ -760,27 +726,10 @@ class BasicTrainer:
             
             print_separator("Final Summary")
             
-            if self.args.parallel_method == "ddp" and self.rank != 0:
-                pass
-            else:  
-                self.print_best_model()
-                self.after_summary()
-                
-                print("Time INOF:")
-                print("Average Train val epoch time: {:.3f}".format(
-                    sum(self.train_val_epoch_time_list) / len(self.train_val_epoch_time_list)))
-                
-                print("Average Train time: {:.3f}".format(
-                    sum(self.train_time_list) / len(self.train_time_list)))
-                
-                print("Average Train first batch time: {:.3f}".format(
-                    sum(self.train_first_batch_time_list) / len(self.train_first_batch_time_list)))
-                
-                print("Average Val time: {:.3f}".format(
-                    sum(self.val_time_list) / len(self.val_time_list)))
-                
-                print("Average Val first batch time: {:.3f}".format(
-                    sum(self.val_first_batch_time_list) / len(self.val_first_batch_time_list)))
+            self.print_best_model()
+            self.after_summary()
+            
+            print("Time INOF:")
                 
             train_validate_end_time = datetime.now()
             print("Training and Validation Start: {}".format(
