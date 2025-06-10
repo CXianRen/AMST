@@ -2,39 +2,27 @@
 source ../env.sh
 source my_venv/bin/activate
 
-cd ../Mart/
 
-SEED=6
+
+SEED=0
 LR=0.001
-BS=64
 EPOCH=100
 
-FUSION=concat
-DATASET="IEMOCAP"
+FUSION=lsum
+DATASET="MVSA"
 
-
+# FOR CREMAD & AVE, disable tf32, 
+# this will effect the perfromance(improve a bit actually)
+# Factor, CREMAD and others using the default(0.1), AVE using 1.0 as original paper
+cd ../code/
 python -m baseline.pmr3_new \
           --save_path ../ckpt \
           --dataset ${DATASET} \
           --random_seed ${SEED} \
           --fusion_method ${FUSION} \
           --learning_rate ${LR} \
-          --epochs ${EPOCH} 
-
-SEED=7
-python -m baseline.pmr3_new \
-          --save_path ../ckpt \
-          --dataset ${DATASET} \
-          --random_seed ${SEED} \
-          --fusion_method ${FUSION} \
-          --learning_rate ${LR} \
-          --epochs ${EPOCH} 
-
-SEED=8
-python -m baseline.pmr3_new \
-          --save_path ../ckpt \
-          --dataset ${DATASET} \
-          --random_seed ${SEED} \
-          --fusion_method ${FUSION} \
-          --learning_rate ${LR} \
-          --epochs ${EPOCH} 
+          --epochs ${EPOCH} \
+          --factor 0.1 \
+          --no_using_ploader \
+          # --no_tf32 \
+          # --no_using_ploader \

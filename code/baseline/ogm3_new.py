@@ -60,51 +60,14 @@ class OGMTrainer(BasicTrainer):
                 sum([out_x_pred[i][labels_device[i]] \
                         for i in range(len(labels_device))])
         
-        # backward
-        # separate the 2 stages of the backward pass for speedup when 
-        # using multiple GPUs (BLP method)
-        temp_grad_dict = {}
-        with torch.profiler.record_function("fusion layer"):
-            # reforward fusion again, to build the gradient graph
-            # in forward(), the graph is not built. 
-            temp_input_dict = dict()
-            for modality_name in self.modality_name_list:
-                temp_input_dict[modality_name] = \
-                embedding_dict[modality_name].detach().to(
-                            self.device_map[MAIN_DEVICE_KEY])   
-                temp_input_dict[modality_name].requires_grad = True
-                
-            out_f = forward_fusion(self.model[KEY_FUSION], temp_input_dict)
+        # backward                
+        out_f = forward_fusion(self.model[KEY_FUSION], embedding_dict)
             
-            loss = self.criterion(out_f, labels_device) 
-            self.optimizer_map[KEY_FUSION].zero_grad()
-            loss.backward()
-            # in ogm-ge, the fusion layer is not modulated
-            for modality_name in self.modality_name_list:
-                temp_grad_dict[modality_name] = \
-                    temp_input_dict[modality_name].grad
-            self.optimizer_map[KEY_FUSION].step()
-        
-        # backward encoders
-        with torch.profiler.record_function("encoder"):   
-            self.optimizer_map[KEY_ENCODERS].zero_grad()
-            device_used = set()
-            
-            for modality_name in self.modality_name_list:
-                e_device = self.device_map[modality_name]
-                device_used.add(e_device)
-                        
-                if self.backward_stream_map.get(modality_name) is None:
-                    self.backward_stream_map[modality_name] = \
-                        torch.cuda.Stream(device=e_device)
-                with torch.cuda.stream(self.backward_stream_map[modality_name]):
-                    embedding_dict[modality_name].backward(
-                        temp_grad_dict[modality_name].to(e_device))
-            
-            # sync all the devices
-            for e_device in device_used:
-                torch.cuda.synchronize(e_device)
-         
+        loss = self.criterion(out_f, labels_device) 
+        self.optimizer_map[KEY_FUSION].zero_grad()
+        self.optimizer_map[KEY_ENCODERS].zero_grad()
+        loss.backward()
+              
         # apply modulation       
         def apply_modulation(score_dict):
             """
@@ -183,9 +146,9 @@ class OGMTrainer(BasicTrainer):
         
         apply_modulation(score_dict) 
         
-        # update the encoders
-        self.optimizer_map[KEY_ENCODERS].step()       
-        
+        # update the fusion layer and encoders
+        self.optimizer_map[KEY_FUSION].step()
+        self.optimizer_map[KEY_ENCODERS].step()
         
 if __name__ == "__main__":
     trainer = OGMTrainer()

@@ -6,11 +6,14 @@ source my_venv/bin/activate
 
 
 FUSION=lsum
-DATASET="CREMAD"
+DATASET="AVE"
 EPOCH=100
-SEED=0
+SEED=1
 
 cd ../code
+
+# FOR CREMAD & AVE, disable tf32, 
+# this will effect the perfromance(improve a bit actually)
 
 python -m baseline.naive_new \
           --save_path ../ckpt \
@@ -18,5 +21,5 @@ python -m baseline.naive_new \
           --random_seed ${SEED} \
           --fusion_method ${FUSION} \
           --epochs ${EPOCH} \
-          # --no_using_ploader \
-          # --no_tf32
+        #   --no_tf32 \
+        #   --no_using_ploader \

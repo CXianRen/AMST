@@ -251,60 +251,9 @@ class MLATrainer(BasicTrainer):
             self.optimizer_map[KEY_FUSION].step()
             self.optimizer_map[KEY_ENCODERS].step()   
             
-    def alter_train_with_stream(self, embedding_dict, labels_device):
-        """
-        use the stream to speed up the training
-        """
-        temp_grad_dict = {}
-        with torch.profiler.record_function("fusion layer"):
-            for modality_name in self.modality_name_list:
-                # fill mute input 
-                # zero_embed = torch.zeros_like(embedding_dict[modality_name]).to(
-                #     device_map[MAIN_DEVICE_KEY])
-                fill_embed = None
-                # fill_embed will be updated by the fusion layer itself
-                # because different fusion methods have different fill_embed
-                # although most of the time, it is just a zero tensor
-                
-                temp_input_dict = dict()
-                for name in self.modality_name_list:
-                    if name == modality_name:
-                        temp_input_dict[name] = embedding_dict[name].detach().to(
-                            self.device_map[MAIN_DEVICE_KEY])   
-                        temp_input_dict[name].requires_grad = True
-                    else:
-                        temp_input_dict[name] = fill_embed
-                
-                out_m = forward_fusion(self.model[KEY_FUSION], temp_input_dict)
-                # out_m = model[KEY_FUSION].get_out_m(modality_name)
-                loss = self.criterion(out_m, labels_device) 
-                self.optimizer_map[KEY_FUSION].zero_grad()
-                loss.backward()
-                temp_grad_dict[modality_name] = \
-                    temp_input_dict[modality_name].grad
-                self.optimizer_map[KEY_FUSION].step()
-
-        with torch.profiler.record_function("encoder"):   
-            self.optimizer_map[KEY_ENCODERS].zero_grad()
-            device_used = set()
-            
-            for modality_name in self.modality_name_list:
-                e_device = self.device_map[modality_name]
-                device_used.add(e_device)
-                
-                if self.backward_stream_map.get(modality_name) is None:
-                    self.backward_stream_map[modality_name] = \
-                        torch.cuda.Stream(device=e_device)
-                with torch.cuda.stream(self.backward_stream_map[modality_name]):
-                    embedding_dict[modality_name].backward(
-                        temp_grad_dict[modality_name].to(e_device))
-            # sync all the devices
-            for e_device in device_used:
-                torch.cuda.synchronize(e_device)
-            self.optimizer_map[KEY_ENCODERS].step()
 
     def train_method(self, embedding_dict, labels_device):
-        self.alter_train_with_stream(
+        self.alter_train(
             embedding_dict, labels_device)
   
 if __name__ == "__main__":

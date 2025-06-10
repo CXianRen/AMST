@@ -172,7 +172,9 @@ class DatasetBase(Dataset):
         first image for pick_num times.
         """
         file_num = len(allimages)
-        seg = max(1, int(file_num / self.pick_num))
+        # seg = max(1, int(file_num / self.pick_num))
+        seg = int(file_num / self.pick_num)
+        
         image_arr = []
         for i in range(self.pick_num):
             tmp_index = min(int(seg * i), file_num - 1)

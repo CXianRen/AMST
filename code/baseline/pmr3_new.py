@@ -72,7 +72,8 @@ class PMRTrainer(BasicTrainer):
         
         #
         parser.add_argument('--factor', default=0.1, type=float,
-                            help='the percentage of dataset to calculate the prototype')
+                            help='the percentage of dataset to calculate the prototype,' +
+                            'for AVE, it ishould be 1, from the original code')
     
         return parser
  
@@ -287,15 +288,22 @@ class PMRTrainer(BasicTrainer):
         # processing for AVE dataset, which is confused.
         # We use the same way as the original code,
         # and they used the whole validation set, which is 
-        # a tricky way to do it. We use the dataset instead.
+        # a tricky way to do it. 
 
         # only use 10% of the training data to calculate the prototype
         # self.args.factor = 0.1 (default)
-        self.prototype_dict = self.calculate_prototype( 
-                            self.train_dataloader,  
-                            self.args.momentum_coef, 
-                            self.prototype_dict, 
-                            factor=self.args.factor)   
+        if self.args.dataset == 'AVE':
+            self.prototype_dict = self.calculate_prototype( 
+                                self.val_dataloader,  
+                                self.args.momentum_coef, 
+                                self.prototype_dict, 
+                                factor=self.args.factor)
+        else:
+            self.prototype_dict = self.calculate_prototype( 
+                                self.train_dataloader,  
+                                self.args.momentum_coef, 
+                                self.prototype_dict, 
+                                factor=self.args.factor)   
         print("Prototypes are updated")
         # print(self.prototype_dict)    
   

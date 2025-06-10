@@ -85,8 +85,6 @@ class BasicTrainer:
             print(f"Error in init_dataloader: {e}")
             self.release()
             raise e
-                
-        self.backward_stream_map = {}
         
         self.softmax=nn.Softmax(dim=1)
         self.criterion=nn.CrossEntropyLoss()
@@ -180,12 +178,12 @@ class BasicTrainer:
     def init_env(self):
         setup_seed(self.args.random_seed)
         # For A100 speed up
-        print("Using TF32 for A100/A40")
+        print("TF32 for A100/A40")
         print("matmul.allow_tf32 = " + str(torch.backends.cuda.matmul.allow_tf32))
         print("cudnn.allow_tf32 = " + str(torch.backends.cudnn.allow_tf32))
         
         if self.args.with_tf32:
-            print("Using TF32 for A100")
+            print("Using TF32 for A100/40")
             torch.backends.cuda.matmul.allow_tf32 = True
             torch.backends.cudnn.allow_tf32 = True
         else:
@@ -339,12 +337,10 @@ class BasicTrainer:
         """ 
         # record the fusion results, and the results of each modality
         self.m_map = {"f": performanceMetric(self.n_classes, name="f")}
-        if self.args.fusion_method in ["gated","gate","film"]:
-            pass
-        else:
-            for modality_name in self.modality_name_list:
-                self.m_map[modality_name] = performanceMetric(
-                    self.n_classes, name=modality_name)
+
+        for modality_name in self.modality_name_list:
+            self.m_map[modality_name] = performanceMetric(
+                self.n_classes, name=modality_name)
             
         # record the helper results of each modality
         self.m_h_map = {}
@@ -437,14 +433,15 @@ class BasicTrainer:
             raise NotImplementedError(f"Dataset not supported: {dataset}")
         return input_dict, labels, extra_infos
 
-    def forward(self, data_packet):
+    def forward(self, data_packet, model=None):
         """
         Forward pass for the model.
         forward the encoders, fusion layer and helper
         """
+        if model is None:
+            model = self.model
                 
         device_map = self.device_map
-        model = self.model
         modality_name_list = self.modality_name_list
         softmax=self.softmax
         criterion=self.criterion
@@ -459,8 +456,7 @@ class BasicTrainer:
             labels_device = labels.to(device_map[MAIN_DEVICE_KEY])
         
         with torch.profiler.record_function("forward_encoders"):
-            embedding_dict = forward_encoders(model[KEY_ENCODERS], 
-                                            input_dict, use_ws=True)
+            embedding_dict = forward_encoders(model[KEY_ENCODERS], input_dict)
         
         local_embedding_dict = {}
         for modality_name in modality_name_list:
@@ -631,8 +627,6 @@ class BasicTrainer:
             # save the best model
             torch.save({
                 "model": self.model.state_dict(),
-                "optimizer_state_dict": self.optimizer_map,
-                "scheduler_state_dict": self.scheduler_map,
                 "args": self.args,
                 "best_val_acc": self.best_val_acc,
                 "best_test_acc": self.best_test_acc,
@@ -650,8 +644,7 @@ class BasicTrainer:
     
     # whole training and validation process
     def train_validate(self):
-        try:
-        
+        try:        
             train_validate_start_time = datetime.now()
             print("Training and Validation Start: {}".format(
                 train_validate_start_time.strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]))

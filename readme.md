@@ -29,6 +29,9 @@ pip install -r requirement.txt
 * For AVE dataset, we used the original splited train valid and test set. But we notice there some samples have more than one labels. 
 
 
+# How to run
+Most running srcripts you can find it under the "./Jobs/xx.sh".
+
 ## Test dataset
 You can run a simple test for debugging when your data is ready.
 ```sh
@@ -37,7 +40,7 @@ python3 -m dataset.test
 
 
 ## Checkpoints
-we have uploaded parts of our model here [ckpt](https://drive.google.com/drive/folders/1x9TER3mc1sMgcALp7x_ooK65IjRHOaHN?usp=sharing). You can download and run evaluated directly with 
+we have uploaded parts of our model here [ckpt](https://drive.google.com/drive/folders/1x9TER3mc1sMgcALp7x_ooK65IjRHOaHN?usp=sharing). You can download and run evaluated directly with:
 
 ```sh
 # single modal model
@@ -45,4 +48,7 @@ python3 -m evaluate.eval_sm --dataset CREMAD --modalit visual --model_path `[YOU
 ```
 
 ```sh
+# multimodal model
+python3 -m evaluate.eval_mm \
+  --model_path `[YOUR CHECKPOINTS PATH]`
 ```

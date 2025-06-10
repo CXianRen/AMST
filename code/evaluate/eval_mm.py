@@ -21,33 +21,36 @@ from metrics import performanceMetric
 
 def get_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataset', type=str)
-    parser.add_argument('--batch_size', default=64, type=int)
+    # parser.add_argument('--dataset', type=str)
+    # parser.add_argument('--batch_size', default=64, type=int)
+    # parser.add_argument('--fusion_method', default='concat', type=str)
     parser.add_argument('--model_path', required=True, type=str, help='path to load trained models')
     return parser.parse_args()
 
 args = get_arguments()
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-gpu_ids = list (range(torch.cuda.device_count()))
-device = torch.device("cuda:0")
+    
+model_path = args.model_path
+# load model weights
+if os.path.isfile(model_path):
+    checkpoint = torch.load(model_path)
+    print("Loading model from {}".format(model_path)) 
+    print("args:\n{}".format(checkpoint['args']))
+    print("Best epoch: {}".format(checkpoint['epoch']))
+    print("Best val acc: {:.4f}".format(checkpoint['best_val_acc']))
+    print("Best test acc: %s" % checkpoint['best_test_acc'])
+else:
+    print("Model file does not exist: {}".format(model_path))
+    sys.exit(1) 
 
+args = checkpoint['args']
+
+device = torch.device("cuda:0")
 
 # load single modality model
 model = gen_model(args)
-
-# load model weights
-model_path = args.model_path
-if os.path.isfile(model_path):
-    print("Loading model from {}".format(model_path))
-    checkpoint = torch.load(model_path)
-    model.load_state_dict(checkpoint['model'])
-else:
-    print("Model file does not exist: {}".format(model_path))
-    sys.exit(1)    
-
+model.load_state_dict(checkpoint['model'])
 model.to(device)
-
 
 _, _, test_dataset\
       = build_train_val_test_datasets(args)
@@ -129,9 +132,11 @@ def forward(model, data_packet):
     out_f_pred = softmax(out_f)
     m.update(out_f_pred, labels_device)
 
-for step, data_packet in enumerate(test_dataloader):
-    ### forward ###
-    forward(data_packet)
+model.eval()
+with torch.no_grad():
+    for step, data_packet in enumerate(test_dataloader):
+        ### forward ###
+        forward(model, data_packet)
 
 
 
