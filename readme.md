@@ -1,4 +1,4 @@
-This repository contains the official implementation of our paper: AMST: Alternating Multimodal Skip Training.
+This repository contains the official implementation of our paper: AMST: Alternating Multimodal Skip Training ([link to be done]()).
 
 The code has been refactored from the initial version, with efforts made to keep it as clean and readable as possible.
 We strive to maintain consistency with the version used in our paper.
@@ -6,6 +6,20 @@ We strive to maintain consistency with the version used in our paper.
 If you encounter any issues or have suggestions, your feedback is highly appreciated.
 We will do our best to maintain and improve this repository—although, as you might understand, it can sometimes be challenging.
 
+
+# Citation info
+First, our code is based on these repors:  
+[MLA](https://github.com/CXianRen/MLA)  
+[PMR](https://github.com/CXianRen/PMR)  
+[OGM-GE](https://github.com/CXianRen/OGM-GE_CVPR2022)
+
+Our citation bib: TO BE DONE
+
+# Structure
+![](./Doc/framework/Full_structure.jpg)
+
+# Skip Machanism
+![](./Doc/framework/skip_machanism.jpg)
 
 # Env
 Most time it should work:
@@ -51,4 +65,24 @@ python3 -m evaluate.eval_sm --dataset CREMAD --modalit visual --model_path `[YOU
 # multimodal model
 python3 -m evaluate.eval_mm \
   --model_path `[YOUR CHECKPOINTS PATH]`
+```
+
+```sh
+# AMST-FULL, use this one
+
+```
+
+## Train baseline & AMST 
+check scripts:
+```sh
+Jobs/naive.sh
+Jobs/mla.sh
+Jobs/ogm3.sh
+Jobs/pmr.sh
+Jobs/mla.sh
+Jobs/single_modality.sh
+
+Jobs/amst_a.sh
+Jobs/amst_j.sh
+Jobs/amst_f.sh
 ```
