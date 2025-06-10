@@ -18,7 +18,7 @@ Our citation bib: TO BE DONE
 # Structure
 ![](./Doc/framework/Full_structure.jpg)
 
-# Skip Machanism
+# Skipping
 ![](./Doc/framework/skip_machanism.jpg)
 
 # Env
