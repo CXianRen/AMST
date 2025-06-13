@@ -8,7 +8,7 @@ source my_venv/bin/activate
 FUSION=lsum
 DATASET="AVE"
 EPOCH=100
-SEED=1
+SEED=10
 
 cd ../code
 
@@ -21,5 +21,5 @@ python -m baseline.naive_new \
           --random_seed ${SEED} \
           --fusion_method ${FUSION} \
           --epochs ${EPOCH} \
-        #   --no_tf32 \
-        #   --no_using_ploader \
+          --no_tf32 \
+          --no_using_ploader \

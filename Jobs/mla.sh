@@ -10,13 +10,10 @@ DATASET="AVE"
 EPOCH=100
 
 cd ../code/
-
-# DATASET="URFUNNY"
-
 python -m baseline.mla_new \
           --save_path ../ckpt \
           --dataset ${DATASET} \
           --random_seed ${SEED} \
           --epochs ${EPOCH} \
-          # --no_tf32 \
-          # --no_using_ploader \
+          --no_tf32 \
+          --no_using_ploader \

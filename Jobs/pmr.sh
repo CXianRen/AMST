@@ -4,12 +4,12 @@ source my_venv/bin/activate
 
 
 
-SEED=0
+SEED=10
 LR=0.001
 EPOCH=100
 
 FUSION=lsum
-DATASET="MVSA"
+DATASET="AVE"
 
 # FOR CREMAD & AVE, disable tf32, 
 # this will effect the perfromance(improve a bit actually)
@@ -24,5 +24,5 @@ python -m baseline.pmr3_new \
           --epochs ${EPOCH} \
           --factor 0.1 \
           --no_using_ploader \
-          # --no_tf32 \
-          # --no_using_ploader \
+          --no_tf32 \
+          --no_using_ploader \

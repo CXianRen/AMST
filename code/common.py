@@ -243,8 +243,8 @@ class BasicTrainer:
             "batch_size": self.args.batch_size,
             "num_workers": 16,
             "pin_memory": True,
-            "persistent_workers": True,
-            "prefetch_factor": 2
+            # "persistent_workers": True,
+            # "prefetch_factor": 2
         }
         
         # normal dataloader
@@ -473,7 +473,6 @@ class BasicTrainer:
             torch.no_grad():
                 out_f = forward_fusion(model[KEY_FUSION], embedding_dict)
                 
-                # for DDP parallelism, only the main device will record the metric
                 if m_map is not None and "f" in m_map:
                     out_f_pred = softmax(out_f)
                     out_f_loss = criterion(out_f, labels_device)
@@ -642,6 +641,13 @@ class BasicTrainer:
         print("Best Epoch: {}".format(
             self.best_epoch))
     
+    def need_run_test(self):
+        if self.args.run_test:
+            val_acc = self.val_m_map["f"].get_acc()
+            if val_acc > self.best_val_acc:
+                return True
+        return False
+        
     # whole training and validation process
     def train_validate(self):
         try:        
@@ -679,7 +685,7 @@ class BasicTrainer:
                 val_time = time.time()
                 
                 # testing
-                if self.args.run_test:
+                if self.need_run_test():
                     print_separator("Testing")
                     test_dataloader = self.get_testloader(epoch)
                     self.before_test()
@@ -687,7 +693,7 @@ class BasicTrainer:
                     self.print_metrics("test")
                     self.after_test()
                     
-                    test_time = time.time()
+                test_time = time.time()
                     
 
                 end_time = time.time()

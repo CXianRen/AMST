@@ -211,12 +211,19 @@ class AMST_F_Trainer(BasicTrainer):
             
             
         # fusion step
+        # just for computing the performance metrics and validation/test step
+        # we will compute the gradient in the train step again
         with torch.no_grad():
             alt_out_f = forward_fusion(self.model["A"][KEY_FUSION],
                 local_alt_embedding_dict)
+            
             joint_out_f = forward_fusion(self.model["J"][KEY_FUSION],
-                loacl_joint_embedding_dict)    
-            final_out_f = alt_out_f + joint_out_f
+                loacl_joint_embedding_dict)
+            
+            # recover the real output of alt fusion by multiplying a factor
+            # compute the average of alt and joint fusion as the framework we proposed
+            # in the paper, we use the average of alt and joint fusion
+            final_out_f = (alt_out_f*len(self.modality_name_list) + joint_out_f)/(len(self.modality_name_list)+1)
         
             final_out_f_pred = softmax(final_out_f)
             final_out_f_loss = criterion(final_out_f, labels_device)

@@ -181,7 +181,8 @@ class UniBERT(nn.Module):
 def weight_init(m):
     if isinstance(m, nn.Linear):
         nn.init.xavier_normal_(m.weight)
-        nn.init.constant_(m.bias, 0)
+        if m.bias is not None:
+            nn.init.constant_(m.bias, 0)
     elif isinstance(m, nn.Conv2d):
         nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
     elif isinstance(m, nn.BatchNorm2d):
@@ -229,6 +230,7 @@ def gen_model(args):
     
     model_dict[KEY_FUSION] = gen_fusion_v2(
         args, embedding_dim, class_num, modality_name_list)
+    model_dict[KEY_FUSION].apply(weight_init)
 
     return model_dict
 

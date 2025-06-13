@@ -192,6 +192,12 @@ class MLATrainer(BasicTrainer):
         # for saving the best model
         self.best_acc_info_map = {}
         
+    def need_run_test(self):
+        """
+        In MLA, we always run the test set
+        """
+        return True
+        
     def update_best_model(self):
         for f_name in self.val_m_f_map.keys():
             val_acc = self.val_m_f_map[f_name].get_acc()

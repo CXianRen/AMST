@@ -6,11 +6,11 @@ source my_venv/bin/activate
 
 
 
-SEED=0
+SEED=10
 EPOCH=100
 
 FUSION=lsum
-DATASET="URFUNNY"
+DATASET="AVE"
 
 cd ../code/
 # FOR CREMAD & AVE, disable tf32, 
@@ -21,6 +21,6 @@ python -m baseline.ogm3_new \
           --random_seed ${SEED} \
           --fusion_method ${FUSION} \
           --epochs ${EPOCH} \
-          #  --no_tf32 \
-          # --no_using_ploader \
+          --no_tf32 \
+          --no_using_ploader \
           

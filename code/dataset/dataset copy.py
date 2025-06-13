@@ -221,7 +221,7 @@ class AVDataset(DatasetBase):
                     # in old version, they did't sort, so every time 
                     # the order of images is guaranteed to be the same.
                     self.sid_all_imgs_map[sid] = \
-                        os.listdir(visual_path) # old version
+                        sorted(os.listdir(visual_path))
                 else:
                     raise FileNotFoundError("File not found: ", 
                         audio_path if not os.path.exists(audio_path) else visual_path)
@@ -353,7 +353,7 @@ class TVADataset(DatasetBase):
                     self.visual_sid_path_map[sid] = visual_path
                     self.audio_sid_path_map[sid] = audio_path
                     self.sid_all_imgs_map[sid] = \
-                        os.listdir(visual_path)
+                        sorted(os.listdir(visual_path))
                 else:
                     raise FileNotFoundError("File not found: ",
                         audio_path if not os.path.exists(audio_path) else visual_path,
@@ -384,3 +384,119 @@ class TVADataset(DatasetBase):
         # size of padding_mask size:  torch.Size([128])
     
         return tokenizer, padding_mask, image_n, audio_feature, label, sid
+    
+
+# import copy
+# class AVDataset(Dataset):
+
+#     def __init__(self, args, mode='train'):
+#         print(os.path.basename(__file__), " -  AVDataset")
+#         classes = []
+#         data = []
+#         data2class = {}
+#         self.mode = mode
+#         self.args = args
+
+#         dataset_cfg = get_data_path_config(args, mode)
+#         # set data paths based on the dataset
+#         print(os.path.basename(__file__), " -  Dataset {} {}".format(args.dataset, mode))
+#         print(os.path.basename(__file__), " -  Dataset config:\n", dataset_cfg.str)
+
+#         self.data_root = dataset_cfg.data_root
+#         self.visual_feature_path = dataset_cfg.visual_feature_path
+#         self.audio_feature_path = dataset_cfg.audio_feature_path
+#         self.stat_path = dataset_cfg.stat_path
+#         self.train_txt = dataset_cfg.train_txt
+#         self.val_txt = dataset_cfg.val_txt
+#         self.test_txt = dataset_cfg.test_txt
+
+#         with open(self.stat_path, "r") as f1:
+#             classes = f1.readlines()
+#         classes = [sclass.strip() for sclass in classes]
+
+#         if mode == 'train':
+#             csv_file = self.train_txt
+#         elif mode == 'val':
+#             csv_file = self.val_txt
+#         else:
+#             csv_file = self.test_txt
+
+#         with open(csv_file, "r") as f2:
+#             csv_reader = f2.readlines()
+#             for single_line in csv_reader:
+#                 sep = sep_map[args.dataset]
+#                 item = [i.strip() for i in single_line.strip().split(sep)]
+#                 audio_path = os.path.join(self.audio_feature_path, item[0] + '.npy')
+#                 visual_path = os.path.join(self.visual_feature_path, item[0])
+#                 if os.path.exists(audio_path) and os.path.exists(visual_path):
+#                     data.append(item[0])
+#                     data2class[item[0]] = item[1]
+#                 else:
+#                     if not os.path.exists(audio_path):
+#                         print("File not found: ", audio_path)
+#                     else:
+#                         print("File not found: ", visual_path)
+#                     continue
+
+#         self.classes = sorted(classes)
+
+#         self.data2class = data2class
+#         self.av_files = []
+#         for item in data:
+#             self.av_files.append(item)
+#         self.mask_av_files = []
+#         print('# of masked files = %d ' % len(self.mask_av_files))
+#         print('# of files = %d ' % len(self.av_files))
+#         print('# of classes = %d' % len(self.classes))
+
+#         if self.mode == 'train':
+#             self.transform = transforms.Compose([
+#                 transforms.RandomResizedCrop(224),
+#                 transforms.RandomHorizontalFlip(),
+#                 transforms.ToTensor(),
+#                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+#             ])
+#         else:
+#             self.transform = transforms.Compose([
+#                 transforms.Resize(size=(224, 224)),
+#                 transforms.ToTensor(),
+#                 transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+#             ])
+
+#     def __len__(self):
+#         return len(self.av_files)
+
+#     def __getitem__(self, idx):
+#         av_file = self.av_files[idx]
+
+#         # Audio
+#         audio_path = os.path.join(self.audio_feature_path, av_file + '.npy')
+#         # feacture can be: spectrogram or fbank
+#         audio_feature = np.load(audio_path)
+
+#         # Visual
+#         visual_path = os.path.join(self.visual_feature_path, av_file)
+#         allimages = os.listdir(visual_path)
+#         file_num = len(allimages)
+
+#         pick_num = 3 # @todo, set by config or args
+#         seg = int(file_num / pick_num)
+#         image_arr = []
+
+#         for i in range(pick_num):
+#             tmp_index = int(seg * i)
+#             image = Image.open(os.path.join(visual_path, allimages[tmp_index])).convert('RGB')
+#             image = self.transform(image)
+#             image = image.unsqueeze(1).float()
+#             image_arr.append(image)
+#             if i == 0:
+#                 #Copying the first image to image_n serves as the initial step in creating a tensor 
+#                 #that will eventually hold all the images concatenated along a new dimension.
+#                 image_n = copy.copy(image_arr[i])
+#             else:
+#                 image_n = torch.cat((image_n, image_arr[i]), 1)
+
+#         # using the index just to convert the label to an integer
+#         label = self.classes.index(self.data2class[av_file])
+
+#         return audio_feature, image_n, label, av_file

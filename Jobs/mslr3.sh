@@ -13,7 +13,7 @@ FUSION=lsum
 
 
 AUDIO_LR=0.001
-VISUAL_LR=0.001
+VISUAL_LR=0.01
 TEXT_LR=0.001
 
 DATASET="AVE"
@@ -28,4 +28,4 @@ python -m baseline.mslr3_new \
           --text_lr ${TEXT_LR} \
           --epochs ${EPOCH} \
           --no_tf32 \
-          # --no_using_ploader \
+          --no_using_ploader \

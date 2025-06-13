@@ -114,13 +114,10 @@ class EarlyConcat(nn.Module):
         # embeddings_dict: {modality: tensor}
         # concatenate the embeddings
         #  W[e1, e2, e3] + b = W1[e1] + b/n + W2[e2]+ b/n + W3[e3] + b/n
-        non_zero_values = [v for v in embeddings_dict.values() if v is not None]
         for k, v in embeddings_dict.items():
             if v is None:
                 # This part should only be used when
                 # using alternating training.
-                # v = torch.zeros_like(non_zero_values[0])
-                
                 continue
                 
             self.out_dict[k] = self.out_layers[k](v) + self.bias/self.n_modalities
@@ -165,7 +162,6 @@ class LateSum(nn.Module):
             if v is None:
                 # This part should only be used when
                 # using alternating training.
-                # v = torch.zeros_like(non_zero_values[0])
                 continue
             self.out_dict[k] = self.out_layers[k](v)
         

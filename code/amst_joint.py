@@ -21,7 +21,7 @@ class AMST_J_Trainer(BasicTrainer):
 
     def init_parser(self):
         parser = super().init_parser()
-        update_arg(parser, '--prefix', default='AMST-AJ', type=str,
+        update_arg(parser, '--prefix', default='AMST-JOINT', type=str,
                             help='prefix for the save path')
         
         # for joint training, it is using the concat fusion 
@@ -73,6 +73,7 @@ class AMST_J_Trainer(BasicTrainer):
                     
         # if all modalities are skipped, we will not do the forward pass
         if all([temp_input_dict[modality_name] is None for modality_name in self.modality_name_list]):
+            print(f"All modalities are skipped at epoch {self.epoch}.")
             return
         
         out_m = forward_fusion(self.model[KEY_FUSION], temp_input_dict)

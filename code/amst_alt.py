@@ -21,7 +21,7 @@ class AMST_A_Trainer(BasicTrainer):
 
     def init_parser(self):
         parser = super().init_parser()
-        update_arg(parser, '--prefix', default='AMST-AJ', type=str,
+        update_arg(parser, '--prefix', default='AMST-ALT', type=str,
                             help='prefix for the save path')
         
         # for joint training, it is using the concat fusion 
