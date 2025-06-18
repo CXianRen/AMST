@@ -54,9 +54,8 @@ You can run a simple test for debugging when your data is ready.
 python3 -m dataset.test
 ```
 
-
 ## Checkpoints
-we have uploaded parts of our model here [ckpt](https://drive.google.com/drive/folders/1x9TER3mc1sMgcALp7x_ooK65IjRHOaHN?usp=sharing)(Due to the space limitation, only CREMAD is uploaded). You can download and run evaluated directly with:
+we have uploaded parts of our model ckpt and also tensorboard files here [ckpt](https://drive.google.com/drive/folders/1x9TER3mc1sMgcALp7x_ooK65IjRHOaHN?usp=sharing)(Due to the space limitation, only CREMAD is uploaded). You can download and run evaluated directly with:
 
 ```sh
 # single modal model
@@ -70,7 +69,11 @@ python3 -m evaluate.eval_mm --model_path `[YOUR CHECKPOINTS PATH]`
 
 ```sh
 # AMST-FULL, use this one
+python3 -m evaluate.eval_amst_f --model_path `[YOUR CHECKPOINTS PATH]`
 ```
+## Some training logs
+[some logs](Doc/Logs)
+
 
 ## Train baseline & AMST 
 check scripts:
