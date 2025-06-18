@@ -4,12 +4,13 @@ source my_venv/bin/activate
 
 
 
-SEED=10
+SEED=0
 LR=0.001
 EPOCH=100
 
 FUSION=lsum
-DATASET="AVE"
+DATASET="CREMAD"
+FACTOR=0.1 # Factor for AVE is 1.0, for others is 0.1
 
 # FOR CREMAD & AVE, disable tf32, 
 # this will effect the perfromance(improve a bit actually)
@@ -22,7 +23,6 @@ python -m baseline.pmr3_new \
           --fusion_method ${FUSION} \
           --learning_rate ${LR} \
           --epochs ${EPOCH} \
-          --factor 0.1 \
+          --factor ${FACTOR} \
           --no_using_ploader \
           --no_tf32 \
-          --no_using_ploader \

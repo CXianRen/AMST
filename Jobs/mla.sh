@@ -6,7 +6,7 @@ SEED=0
 LR=0.001
 BS=64
 
-DATASET="AVE"
+DATASET="CREMAD"
 EPOCH=100
 
 cd ../code/

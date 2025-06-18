@@ -2,19 +2,14 @@
 source ../env.sh
 source my_venv/bin/activate
 
-
-
-
-
-SEED=10
+SEED=0
 EPOCH=100
 
 FUSION=lsum
-DATASET="AVE"
+DATASET="CREMAD"
 
 cd ../code/
-# FOR CREMAD & AVE, disable tf32, 
-# this will effect the perfromance(improve a bit actually)
+
 python -m baseline.ogm3_new \
           --save_path ../ckpt \
           --dataset ${DATASET} \

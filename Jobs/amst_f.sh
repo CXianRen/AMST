@@ -7,7 +7,7 @@ cd ../code/
 LR=0.001
 BS=64
 EPOCH=100
-SEED=12
+SEED=0
 
 
 # CREMAD 5, AVE 2, IEMOCAP2 4 IEMOCAP3 4, MVSA, URFUNNY 6
@@ -22,17 +22,16 @@ SEED=12
 # T_F = 10
 
 # AVE
-DATASET="AVE"
-A_F=2
-V_F=1
-T_F=0  # T_F is not used in this dataset
-
-# CREMAD
-# DATASET="CREMAD"
-# A_F=5
+# DATASET="AVE"
+# A_F=2
 # V_F=1
 # T_F=0  # T_F is not used in this dataset
 
+# CREMAD
+DATASET="CREMAD"
+A_F=5
+V_F=1
+T_F=0  # T_F is not used in this dataset
 
 
 python amst_full.py \

@@ -1,16 +1,11 @@
 # This file is based on the original MLA code,
 # link: https://github.com/CXianRen/MLA/blob/main/models/fusion_modules.py
 # We support fusion methods:
-# 1. esum: Early Sum, the standard definition of early fusion
-# 2. lsum: Late Sum, from the original MLA, OGM-GE code, this is fusion
+# 1. lsum: Late Sum, from the original MLA, OGM-GE code, this is fusion
 # is a bit wired, but for consistency, we keep it.
-# 3. msum: MLA Sum, it is the shared head fusion. It is only used in MLA method 
+# 2. msum: MLA Sum, it is the shared head fusion. It is only used in MLA method 
 # and MLA related experiments.
-# 4. concat: Early Concat, the standard definition of early fusion
-# 5. gated: Gated Fusion. It actually is bi-gated fusion, in our experiments, 
-# we always use audio as the control modality (gate or film).
-# 6. film: FiLM, same as gated fusion
-
+# 3. concat: Early Concat, the standard definition of early fusion
 
 import torch
 import torch.nn as nn
@@ -152,12 +147,11 @@ class LateSum(nn.Module):
         self.out_dict = dict()
         
         for m in modality_name_list:
-            self.out_layers[m] = nn.Linear(input_dim, output_dim, bias=True)
+            self.out_layers[m] = nn.Linear(input_dim, output_dim)
     
     def forward(self, embeddings_dict: dict):
         self.out_dict = dict()
         # embeddings_dict: {modality: tensor}
-        non_zero_values = [v for v in embeddings_dict.values() if v is not None]
         for k, v in embeddings_dict.items():
             if v is None:
                 # This part should only be used when

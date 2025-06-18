@@ -6,6 +6,8 @@ We strive to maintain consistency with the version used in our paper.
 If you encounter any issues or have suggestions, your feedback is highly appreciated.
 We will do our best to maintain and improve this repository—although, as you might understand, it can sometimes be challenging.
 
+During the refactoring, we also found some bugs and fixed them in MLA original code and the MSLR code, so the results will be different. And baseline parameters are from their original papers, if they are not provided, we just used the default one. 
+
 
 # Citation info
 First, our code is based on these repors:  
@@ -54,7 +56,7 @@ python3 -m dataset.test
 
 
 ## Checkpoints
-we have uploaded parts of our model here [ckpt](https://drive.google.com/drive/folders/1x9TER3mc1sMgcALp7x_ooK65IjRHOaHN?usp=sharing). You can download and run evaluated directly with:
+we have uploaded parts of our model here [ckpt](https://drive.google.com/drive/folders/1x9TER3mc1sMgcALp7x_ooK65IjRHOaHN?usp=sharing)(Due to the space limitation, only CREMAD is uploaded). You can download and run evaluated directly with:
 
 ```sh
 # single modal model
@@ -63,13 +65,11 @@ python3 -m evaluate.eval_sm --dataset CREMAD --modalit visual --model_path `[YOU
 
 ```sh
 # multimodal model
-python3 -m evaluate.eval_mm \
-  --model_path `[YOUR CHECKPOINTS PATH]`
+python3 -m evaluate.eval_mm --model_path `[YOUR CHECKPOINTS PATH]`
 ```
 
 ```sh
 # AMST-FULL, use this one
-
 ```
 
 ## Train baseline & AMST 

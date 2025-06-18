@@ -16,7 +16,7 @@ AUDIO_LR=0.001
 VISUAL_LR=0.01
 TEXT_LR=0.001
 
-DATASET="AVE"
+DATASET="CREMAD"
 
 python -m baseline.mslr3_new \
           --save_path ../ckpt \

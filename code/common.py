@@ -581,23 +581,20 @@ class BasicTrainer:
                 first_batch_end_time = time.time()
 
             ### forward ###
-            with torch.profiler.record_function("forward"):
-                embedding_dict, helper_out_dict, labels_device = \
-                    self.forward(data_packet)
-                self.after_forward_batch(embedding_dict, labels_device)
-                
-            # train each modality alternatively
-            with torch.profiler.record_function("backward_main"):
-                self.train_method(embedding_dict, labels_device)
-                
+            embedding_dict, helper_out_dict, labels_device = \
+                self.forward(data_packet)
+            self.after_forward_batch(embedding_dict, labels_device)
+            
             ### backward ###
+            # train each modality alternatively
+            self.train_method(embedding_dict, labels_device)
+                
             # backward helper, we don't update the backbone, just update the helper
-            with torch.profiler.record_function("backward_helper"):
-                self.optimizer_map[KEY_HELPERS].zero_grad()
-                for modality_name in self.modality_name_list:
-                    loss = self.criterion(helper_out_dict[modality_name], labels_device)
-                    loss.backward()
-                self.optimizer_map[KEY_HELPERS].step()
+            self.optimizer_map[KEY_HELPERS].zero_grad()
+            for modality_name in self.modality_name_list:
+                loss = self.criterion(helper_out_dict[modality_name], labels_device)
+                loss.backward()
+            self.optimizer_map[KEY_HELPERS].step()
 
             # time measurement
             epoch_end_time = time.time()
@@ -606,7 +603,7 @@ class BasicTrainer:
             self.train_first_batch_time_list.append(
                 first_batch_end_time - epoch_start_time)
             #
-            
+    
         for sch in self.scheduler_map.values():
             sch.step()
 
