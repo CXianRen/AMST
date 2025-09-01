@@ -1,4 +1,4 @@
-This repository contains the official implementation of our paper: AMST: Alternating Multimodal Skip Training ([link to be done]()).
+This repository contains the official implementation of our paper: AMST: Alternating Multimodal Skip Training ([pre-print](https://ecmlpkdd-storage.s3.eu-central-1.amazonaws.com/preprints/2025/research/preprint_ecml_pkdd_2025_research_372.pdf)).
 
 The code has been refactored from the initial version, with efforts made to keep it as clean and readable as possible.
 We strive to maintain consistency with the version used in our paper.
@@ -15,7 +15,16 @@ First, our code is based on these repors:
 [PMR](https://github.com/CXianRen/PMR)  
 [OGM-GE](https://github.com/CXianRen/OGM-GE_CVPR2022)
 
-Our citation bib: TO BE DONE
+Our citation bib:
+```
+@misc{silva2025amst,
+  author = {Silva, Hugo Manuel Alves Henriques e and Chen, Hongguang and Selpi},
+  title = {AMST: Alternating Multimodal Skip Training},
+  year = {2025},
+  note = {ECML PKDD 2025 Preprints},
+  url = {https://ecmlpkdd-storage.s3.eu-central-1.amazonaws.com/preprints/2025/research/preprint_ecml_pkdd_2025_research_372.pdf}
+}
+```
 
 # Structure
 ![](./Doc/framework/Full_structure.jpg)
