@@ -4,9 +4,10 @@ The code has been refactored from the initial version, with efforts made to keep
 We strive to maintain consistency with the version used in our paper.
 
 If you encounter any issues or have suggestions, your feedback is highly appreciated.
-We will do our best to maintain and improve this repository—although, as you might understand, it can sometimes be challenging.
+We ([@hugoesilva](https://github.com/hugoesilva) and [@CXianRen](https://github.com/CXianRen/)) will do our best to maintain and improve this repository—although, as you might understand, it can sometimes be challenging.
 
 During the refactoring, we also found some bugs and fixed them in MLA original code and the MSLR code, so the results will be different. And baseline parameters are from their original papers, if they are not provided, we just used the default one. 
+
 
 
 # Citation info
